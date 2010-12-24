@@ -7,7 +7,30 @@ class TestArel < Test::Unit::TestCase
     @mysql    = init_mysql
   end
 
-  def test_01_sql_basic_select
+  def test_01_construction
+    assert_kind_of(RDBI::Arel, @sqlite3)
+    assert_kind_of(RDBI::Arel, @postgres)
+    assert_kind_of(RDBI::Arel, @mysql)
+
+    assert_kind_of(Arel::Table, @sqlite3[:foo])
+    assert_kind_of(Arel::Table, @sqlite3.foo)
+    assert_kind_of(Arel::Table, @postgres[:foo])
+    assert_kind_of(Arel::Table, @postgres.foo)
+    assert_kind_of(Arel::Table, @mysql[:foo])
+    assert_kind_of(Arel::Table, @mysql.foo)
+  end
+
+  def test_02_composition
+    assert_kind_of(Arel::SelectManager, @sqlite3.foo.project(Arel.sql("*")))
+    assert_kind_of(Arel::SelectManager, @postgres.foo.project(Arel.sql("*")))
+    assert_kind_of(Arel::SelectManager, @mysql.foo.project(Arel.sql("*")))
+    
+    assert_kind_of(Arel::SelectManager, @sqlite3.foo.where(@sqlite3.foo[:foo].eq("stuff")))
+    assert_kind_of(Arel::SelectManager, @postgres.foo.where(@postgres.foo[:foo].eq("stuff")))
+    assert_kind_of(Arel::SelectManager, @mysql.foo.where(@mysql.foo[:foo].eq("stuff")))
+  end
+
+  def test_03_sql_basic_select
     assert_equal(
       @sqlite3[:foo].project(Arel.sql("*")).where(@sqlite3[:foo][:id].eq('stuff')).to_sql,
       %q[SELECT * FROM "foo"  WHERE "foo"."id" = 'stuff']
@@ -25,7 +48,7 @@ class TestArel < Test::Unit::TestCase
   end
 
 
-  def test_02_join
+  def test_04_join
     assert_equal(
       @sqlite3[:foo].project(Arel.sql("*")).join(@sqlite3[:bar]).on(@sqlite3[:bar][:id].eq(@sqlite3[:foo][:id])).to_sql,
       %q[SELECT * FROM "foo" INNER JOIN "bar" ON "bar"."id" = "foo"."id"]

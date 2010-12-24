@@ -42,6 +42,10 @@ class RDBI::Arel
 
   alias [] table
 
+  def method_missing(sym)
+    self[sym]
+  end
+
   def dbh
     @pool.get_dbh 
   end
