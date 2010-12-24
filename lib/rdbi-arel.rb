@@ -1,6 +1,14 @@
 require 'arel'
 require 'rdbi'
 
+if defined? RDBI::DBRC
+  module RDBI::DBRC
+    def self.arel_connect(role)
+      RDBI::Arel.new(self.roles[role])
+    end
+  end
+end
+
 class RDBI::Pool
   def with_connection
     yield RDBI::Arel::Connection.new(get_dbh)
@@ -17,11 +25,33 @@ end
 
 class RDBI::Arel
   def initialize(*connection_params)
-    @pool = RDBI::Pool.new(:arel, connection_params, 1)
+    if connection_params.kind_of?(Array)
+      connection_params = connection_params[0]
+    end
+
+    @pool = RDBI::Pool.new(
+      connection_params[:pool_name] || :arel, 
+      connection_params, 
+      connection_params[:pool_size] || 1
+    )
   end
 
   def table(table_name)
     Arel::Table.new(table_name, RDBI::Arel::TableEngine.new(@pool, table_name))
+  end
+
+  alias [] table
+
+  def dbh
+    @pool.get_dbh 
+  end
+
+  def tables(schema=nil)
+    @pool.get_dbh.schema(schema)
+  end
+
+  def disconnect
+    @pool.disconnect
   end
 
   class Connection
@@ -33,7 +63,7 @@ class RDBI::Arel
       @schema = @dbh.schema
 
       @primary_keys = { }
-      @tables = []
+      @tables = [ ]
 
       @schema.each_with_index do |table, i|
         column = @schema[i].columns.find(&:primary_key)
@@ -52,12 +82,12 @@ class RDBI::Arel
     end
 
     def table_exists?(name)
-      !!@schema[name.to_s]
+      !!@tables[name]  
     end
 
     def columns(name, message = nil)
       # FIXME what is the message for?
-      @schema[name.to_s]
+      @schema.find { |schema| schema.tables.include?(name) }.columns.map(&:name)
     end
 
     def quote_table_name(name)
@@ -84,7 +114,7 @@ class RDBI::Arel
     end
 
     def columns
-      @dbh.table_schema(table_name)
+      @dbh.table_schema(table_name).columns
     end
 
     def connection_pool

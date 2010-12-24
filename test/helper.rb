@@ -22,13 +22,15 @@ class Test::Unit::TestCase
   SQL =
   [
     'drop table if exists foo',
-    'create table foo (id integer)'
+    'create table foo (id integer primary key, foo varchar(255))',
+    'drop table if exists bar',
+    'create table bar (id integer primary key, bar varchar(255))',
   ]
  
   def init_db(rc_string)
-    dbh = RDBI::DBRC.connect(rc_string)
-    SQL.each { |x| dbh.execute_modification(x) }
-    return dbh
+    arel = RDBI::DBRC.arel_connect(rc_string)
+    SQL.each { |x| arel.dbh.execute_modification(x) }
+    return arel 
   end
 
   def init_postgres

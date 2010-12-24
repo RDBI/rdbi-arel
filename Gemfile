@@ -14,5 +14,5 @@ group :development do
   gem 'rdbi-driver-mysql'
   gem 'rdbi-driver-sqlite3'
   gem 'rdbi-dbrc'
-  gem 'arel'
+  gem 'arel', "2.0.7.beta"
 end
