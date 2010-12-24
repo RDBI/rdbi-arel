@@ -63,7 +63,7 @@ class RDBI::Arel
       @schema = @dbh.schema
 
       @primary_keys = { }
-      @tables = [ ]
+      @tables = { }
 
       @schema.each_with_index do |table, i|
         column = @schema[i].columns.find(&:primary_key)
@@ -73,7 +73,7 @@ class RDBI::Arel
           @primary_keys[table.to_s] = nil
         end
 
-        @tables.push(table.to_s)
+        @tables[table.to_s] = primary_key(table)
       end
     end
 
