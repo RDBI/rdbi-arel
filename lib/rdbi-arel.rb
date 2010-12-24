@@ -1,7 +1,5 @@
 require 'arel'
 require 'rdbi'
-require 'rdbi-driver-postgresql'
-require 'epoxy'
 
 class RDBI::Pool
   def with_connection
@@ -95,6 +93,7 @@ class RDBI::Arel
   end
 end
 
+__END__
 
 arel = RDBI::Arel.new(:PostgreSQL, :database => 'rdbi_test')
 ord = arel.table(:ordinals)

@@ -16,13 +16,17 @@ Jeweler::Tasks.new do |gem|
   gem.homepage = "http://github.com/erikh/rdbi-arel"
   gem.license = "MIT"
   gem.summary = %Q{ARel Layer for RDBI}
-  gem.description = %Q{TODO: longer description of your gem}
+  gem.description = %Q{Control RDBI with the SQL generation library ARel!}
   gem.email = "erik@hollensbe.org"
   gem.authors = ["Erik Hollensbe"]
-  # Include your dependencies below. Runtime dependencies are required when using your gem,
-  # and development dependencies are only needed for development (ie running rake tasks, tests, etc)
-  #  gem.add_runtime_dependency 'jabber4r', '> 0.1'
-  #  gem.add_development_dependency 'rspec', '> 1.2.3'
+  gem.add_dependency 'arel', '~> 2.0'
+  gem.add_dependency 'rdbi', '>= 0.9.1'
+
+  gem.add_development_dependency 'rdbi-dbrc'
+  gem.add_development_dependency 'jeweler'
+  gem.add_development_dependency 'rdbi-driver-postgresql'
+  gem.add_development_dependency 'rdbi-driver-mysql'
+  gem.add_development_dependency 'rdbi-driver-sqlite3'
 end
 Jeweler::RubygemsDotOrgTasks.new
 
